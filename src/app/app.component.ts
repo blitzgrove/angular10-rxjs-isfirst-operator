@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 
 import { timer, Observable, Subject, combineLatest } from "rxjs";
-import { tap, takeUntil } from "rxjs/operators";
+import { switchMap, tap, takeUntil } from "rxjs/operators";
 
 export const isFirst = (predicate: any) => {
   let first = true;
@@ -22,15 +22,18 @@ export const isFirst = (predicate: any) => {
 @Component({
   selector: "my-app",
   template: `
+    <button (mouseup)="start$.next()">Start</button>
     <button (mouseup)="stop$.next()">Stop</button>
   `
 })
 export class AppComponent {
+  start$ = new Subject<any>();
   stop$ = new Subject<any>();
 
   constructor() {
-    combineLatest(timer(2000, 1000), timer(3000, 500))
+    this.start$
       .pipe(
+        switchMap(_ => combineLatest(timer(2000, 1000), timer(3000, 500))),
         isFirst(_ => {
           console.log("first");
         }),
