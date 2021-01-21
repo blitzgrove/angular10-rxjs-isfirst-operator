@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 
 import { timer, Observable, Subject, combineLatest } from "rxjs";
-import { switchMap, tap, takeUntil } from "rxjs/operators";
+import { tap, repeat, switchMap, finalize, takeUntil } from "rxjs/operators";
 
 export const isFirst = (predicate: any) => {
   let first = true;
@@ -33,11 +33,14 @@ export class AppComponent {
   constructor() {
     this.start$
       .pipe(
+        tap(_ => console.log("Start...")),
         switchMap(_ => combineLatest(timer(2000, 1000), timer(3000, 500))),
         isFirst(_ => {
           console.log("first");
         }),
-        takeUntil(this.stop$)
+        takeUntil(this.stop$),
+        finalize(() => console.log("...Stop")),
+        repeat()
       )
       .subscribe({
         next: r => console.log("inside subscription:", r)
